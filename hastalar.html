@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="fw-bold mb-0">
+    <i class="bi bi-people me-2 text-primary"></i>Hastalar
+  </h4>
+  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#hastaModal">
+    <i class="bi bi-plus-lg me-1"></i>Hasta Ekle
+  </button>
+</div>
+
+<!-- Arama -->
+<div class="card mb-3">
+  <div class="card-body py-2 px-3">
+    <form method="get" class="d-flex gap-2">
+      <div class="input-group">
+        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+        <input type="text" name="q" value="{{ q }}" class="form-control border-start-0 ps-0"
+               placeholder="Ad, soyad veya TC ara...">
+      </div>
+      <button class="btn btn-outline-primary px-3">Ara</button>
+      {% if q %}
+      <a href="/hastalar" class="btn btn-outline-secondary">
+        <i class="bi bi-x"></i>
+      </a>
+      {% endif %}
+    </form>
+  </div>
+</div>
+
+<!-- Tablo -->
+<div class="card">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Ad Soyad</th>
+            <th>Yaş</th>
+            <th>Telefon</th>
+            <th>TC No</th>
+            <th class="text-end">İşlem</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for h in hastalar %}
+        <tr>
+          <td><span class="badge-id">#{{ h.id }}</span></td>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
+                   style="width:34px;height:34px;background:#3b82f6;font-size:.8rem;flex-shrink:0;">
+                {{ h.ad[0] }}{{ h.soyad[0] }}
+              </div>
+              <span class="fw-medium">{{ h.ad }} {{ h.soyad }}</span>
+            </div>
+          </td>
+          <td>{{ h.yas or '—' }}</td>
+          <td>
+            {% if h.telefon %}
+            <a href="tel:{{ h.telefon }}" class="text-decoration-none text-dark">
+              <i class="bi bi-telephone me-1 text-muted"></i>{{ h.telefon }}
+            </a>
+            {% else %}—{% endif %}
+          </td>
+          <td><code class="text-muted">{{ h.tcno or '—' }}</code></td>
+          <td class="text-end">
+            <a href="/hasta/sil/{{ h.id }}" class="btn btn-sm btn-outline-danger"
+               onclick="return confirm('{{ h.ad }} {{ h.soyad }} adlı hastayı silmek istediğinize emin misiniz?')">
+              <i class="bi bi-trash"></i>
+            </a>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" class="text-center py-5 text-muted">
+            <i class="bi bi-inbox display-6 d-block mb-2 opacity-25"></i>
+            {% if q %}
+            "<strong>{{ q }}</strong>" için sonuç bulunamadı.
+            {% else %}
+            Henüz hasta kaydı yok.
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card-footer">
+    <i class="bi bi-people me-1"></i>
+    Toplam {{ hastalar|length }} hasta
+    {% if q %}<span class="ms-2 text-muted">— "<strong>{{ q }}</strong>" araması için</span>{% endif %}
+  </div>
+</div>
+
+<!-- Modal: Hasta Ekle -->
+<div class="modal fade" id="hastaModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <form method="post" action="/hasta/ekle" class="modal-content">
+      <div class="modal-header text-white" style="background: linear-gradient(135deg, #1e3a8a, #2563eb);">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-person-plus me-2"></i>Yeni Hasta Kaydı
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="row g-3">
+          <div class="col-6">
+            <label class="form-label">Ad <span class="text-danger">*</span></label>
+            <input name="ad" class="form-control" required placeholder="Ahmet">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Soyad <span class="text-danger">*</span></label>
+            <input name="soyad" class="form-control" required placeholder="Yılmaz">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Yaş</label>
+            <input name="yas" type="number" class="form-control" min="0" max="150" placeholder="35">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Telefon</label>
+            <input name="telefon" class="form-control" placeholder="05xx xxx xx xx">
+          </div>
+          <div class="col-12">
+            <label class="form-label">TC Kimlik No</label>
+            <input name="tcno" class="form-control" maxlength="11" placeholder="12345678901">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">İptal</button>
+        <button type="submit" class="btn btn-primary px-4">
+          <i class="bi bi-save me-1"></i>Kaydet
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

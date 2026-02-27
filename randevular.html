@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="fw-bold mb-0">
+    <i class="bi bi-calendar-check me-2 text-warning"></i>Randevular
+  </h4>
+  <button class="btn btn-warning text-white" data-bs-toggle="modal" data-bs-target="#randevuModal">
+    <i class="bi bi-plus-lg me-1"></i>Randevu Al
+  </button>
+</div>
+
+<!-- Filtreler -->
+<div class="card mb-3">
+  <div class="card-body py-2 px-3">
+    <form method="get" class="row g-2 align-items-center">
+      <div class="col-md-5">
+        <select name="hasta_id" class="form-select form-select-sm">
+          <option value="">Tüm Hastalar</option>
+          {% for h in hastalar %}
+          <option value="{{ h.id }}" {% if hasta_id|string == h.id|string %}selected{% endif %}>
+            {{ h.ad }} {{ h.soyad }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <select name="durum" class="form-select form-select-sm">
+          <option value="">Tüm Durumlar</option>
+          <option value="Aktif"  {% if durum_f == 'Aktif'  %}selected{% endif %}>Aktif</option>
+          <option value="İptal"  {% if durum_f == 'İptal'  %}selected{% endif %}>İptal</option>
+        </select>
+      </div>
+      <div class="col-auto">
+        <button class="btn btn-sm btn-outline-warning">
+          <i class="bi bi-filter me-1"></i>Filtrele
+        </button>
+        {% if hasta_id or durum_f %}
+        <a href="/randevular" class="btn btn-sm btn-outline-secondary ms-1">
+          <i class="bi bi-x me-1"></i>Temizle
+        </a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Tablo -->
+<div class="card">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Hasta</th>
+            <th>Doktor</th>
+            <th>Tarih</th>
+            <th>Saat</th>
+            <th>Durum</th>
+            <th class="text-end">İşlem</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for r in randevular %}
+        <tr>
+          <td><span class="badge-id">#{{ r.id }}</span></td>
+          <td class="fw-medium">{{ r.hasta_adi }}</td>
+          <td>
+            <div>
+              <div class="fw-medium">Dr. {{ r.doktor_adi }}</div>
+              <div class="small text-muted">{{ r.uzmanlik }}</div>
+            </div>
+          </td>
+          <td>
+            <i class="bi bi-calendar3 me-1 text-muted"></i>{{ r.tarih }}
+          </td>
+          <td>
+            <i class="bi bi-clock me-1 text-muted"></i>{{ r.saat }}
+          </td>
+          <td>
+            <span class="badge-{{ 'aktif' if r.durum == 'Aktif' else 'iptal' }}">
+              <i class="bi bi-{{ 'check-circle' if r.durum == 'Aktif' else 'x-circle' }} me-1"></i>
+              {{ r.durum }}
+            </span>
+          </td>
+          <td class="text-end">
+            {% if r.durum == 'Aktif' %}
+            <a href="/randevu/iptal/{{ r.id }}" class="btn btn-sm btn-outline-warning me-1"
+               onclick="return confirm('Bu randevuyu iptal etmek istediğinize emin misiniz?')">
+              <i class="bi bi-x-circle"></i> İptal
+            </a>
+            {% endif %}
+            <a href="/randevu/sil/{{ r.id }}" class="btn btn-sm btn-outline-danger"
+               onclick="return confirm('Bu randevuyu tamamen silmek istediğinize emin misiniz?')">
+              <i class="bi bi-trash"></i>
+            </a>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="7" class="text-center py-5 text-muted">
+            <i class="bi bi-calendar-x display-6 d-block mb-2 opacity-25"></i>
+            Kayıtlı randevu bulunamadı.
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card-footer">
+    <i class="bi bi-calendar-check me-1"></i>Toplam {{ randevular|length }} randevu
+  </div>
+</div>
+
+<!-- Modal: Randevu Al -->
+<div class="modal fade" id="randevuModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <form method="post" action="/randevu/al" class="modal-content">
+      <div class="modal-header text-white" style="background: linear-gradient(135deg, #92400e, #d97706);">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-calendar-plus me-2"></i>Randevu Al
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+        {% if not hastalar %}
+        <div class="alert alert-warning">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          Önce hasta kaydı yapınız.
+        </div>
+        {% elif not doktorlar %}
+        <div class="alert alert-warning">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          Önce doktor kaydı yapınız.
+        </div>
+        {% else %}
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label">Hasta <span class="text-danger">*</span></label>
+            <select name="hasta_id" class="form-select" required>
+              <option value="">Hasta seçin...</option>
+              {% for h in hastalar %}
+              <option value="{{ h.id }}">{{ h.ad }} {{ h.soyad }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Doktor <span class="text-danger">*</span></label>
+            <select name="doktor_id" class="form-select" required>
+              <option value="">Doktor seçin...</option>
+              {% for d in doktorlar %}
+              <option value="{{ d.id }}">Dr. {{ d.ad }} {{ d.soyad }} — {{ d.uzmanlik }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-6">
+            <label class="form-label">Tarih <span class="text-danger">*</span></label>
+            <input name="tarih" type="date" class="form-control" required
+                   min="{{ '' }}">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Saat <span class="text-danger">*</span></label>
+            <input name="saat" type="time" class="form-control" required>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">İptal</button>
+        {% if hastalar and doktorlar %}
+        <button type="submit" class="btn btn-warning text-white px-4">
+          <i class="bi bi-calendar-check me-1"></i>Randevu Al
+        </button>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

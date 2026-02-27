@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- Hero -->
+<div class="card mb-4" style="background: linear-gradient(135deg, #1e3a8a, #2563eb); color: white; overflow:hidden;">
+  <div class="card-body p-4">
+    <div class="row align-items-center">
+      <div class="col">
+        <h2 class="fw-bold mb-1"><i class="bi bi-hospital me-2"></i>Hastane Randevu Sistemi</h2>
+        <p class="mb-0 opacity-75">Hasta, doktor ve randevu yönetimini buradan yönetebilirsiniz.</p>
+      </div>
+      <div class="col-auto d-none d-md-block">
+        <i class="bi bi-activity" style="font-size: 4rem; opacity:.2;"></i>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- İstatistikler -->
+<div class="row g-4 mb-4">
+  <div class="col-md-4">
+    <a href="/hastalar" class="text-decoration-none">
+      <div class="stat-card d-flex align-items-center gap-3">
+        <div class="stat-icon" style="background:#eff6ff;">
+          <i class="bi bi-people-fill text-primary" style="font-size:1.6rem;"></i>
+        </div>
+        <div>
+          <div class="fs-2 fw-bold text-dark">{{ hasta_n }}</div>
+          <div class="text-muted small">Kayıtlı Hasta</div>
+        </div>
+        <i class="bi bi-arrow-right ms-auto text-muted"></i>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-4">
+    <a href="/doktorlar" class="text-decoration-none">
+      <div class="stat-card d-flex align-items-center gap-3">
+        <div class="stat-icon" style="background:#f0fdf4;">
+          <i class="bi bi-person-badge-fill" style="font-size:1.6rem; color:#059669;"></i>
+        </div>
+        <div>
+          <div class="fs-2 fw-bold text-dark">{{ doktor_n }}</div>
+          <div class="text-muted small">Kayıtlı Doktor</div>
+        </div>
+        <i class="bi bi-arrow-right ms-auto text-muted"></i>
+      </div>
+    </a>
+  </div>
+  <div class="col-md-4">
+    <a href="/randevular" class="text-decoration-none">
+      <div class="stat-card d-flex align-items-center gap-3">
+        <div class="stat-icon" style="background:#fffbeb;">
+          <i class="bi bi-calendar-check-fill" style="font-size:1.6rem; color:#d97706;"></i>
+        </div>
+        <div>
+          <div class="fs-2 fw-bold text-dark">{{ randevu_n }}</div>
+          <div class="text-muted small">Aktif Randevu</div>
+        </div>
+        <i class="bi bi-arrow-right ms-auto text-muted"></i>
+      </div>
+    </a>
+  </div>
+</div>
+
+<!-- Hızlı Erişim -->
+<div class="row g-3 mb-4">
+  <div class="col-12">
+    <h6 class="text-muted fw-semibold mb-3" style="letter-spacing:.5px;">HIZLI ERİŞİM</h6>
+  </div>
+  <div class="col-md-4">
+    <a href="/hastalar" class="btn btn-primary w-100 py-2">
+      <i class="bi bi-person-plus me-2"></i>Hasta İşlemleri
+    </a>
+  </div>
+  <div class="col-md-4">
+    <a href="/doktorlar" class="btn btn-success w-100 py-2">
+      <i class="bi bi-person-badge me-2"></i>Doktor İşlemleri
+    </a>
+  </div>
+  <div class="col-md-4">
+    <a href="/randevular" class="btn btn-warning text-white w-100 py-2">
+      <i class="bi bi-calendar-plus me-2"></i>Randevu İşlemleri
+    </a>
+  </div>
+</div>
+
+<!-- Son Randevular -->
+{% if son_randevular %}
+<div class="card">
+  <div class="card-header bg-white py-3">
+    <i class="bi bi-clock-history me-2 text-muted"></i>Son Randevular
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Hasta</th><th>Doktor</th><th>Tarih</th><th>Saat</th><th>Durum</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for r in son_randevular %}
+        <tr>
+          <td class="fw-medium">{{ r.hasta_adi }}</td>
+          <td>Dr. {{ r.doktor_adi }}</td>
+          <td>{{ r.tarih }}</td>
+          <td>{{ r.saat }}</td>
+          <td>
+            <span class="badge-{{ 'aktif' if r.durum == 'Aktif' else 'iptal' }}">{{ r.durum }}</span>
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card-footer">
+    <a href="/randevular" class="text-decoration-none">Tümünü görüntüle →</a>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
